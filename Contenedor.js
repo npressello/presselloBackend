@@ -50,7 +50,6 @@ class Contenedor {
 
   // Lee el archivo y obtiene todos los items. Remueve el id elegido y guarda nuevamente los objetos sin ese item
   async deleteById(id) {
-    console.log("Entro a deleteById");
     try {
       this.objects = await this.getAll();
       this.objects = this.objects.filter(el => el.id != Number(id));
@@ -60,12 +59,9 @@ class Contenedor {
     }
   }
 
-  // Lee el archivo se lee el archivo para verificar si tiene algun item
   // Se crea arreglo vacio y se graba en el archivo
   async deleteAll() {
-    console.log("Entro a deleteAll");
     try {
-      this.objects = await this.getAll();
       this.objects = [];
       this.writeData(this.objects);
     } catch (err) {
@@ -75,7 +71,6 @@ class Contenedor {
 
   // Funciones utilitarias de uso interno de la clase
   readData(path) {
-    console.log("Entro a readData");
     try {
       const data = JSON.parse(fs.readFileSync(path, 'utf-8'));
       return data;
@@ -85,7 +80,6 @@ class Contenedor {
   }
 
   writeData(items) {
-    console.log("Entro a writeData");
     fs.writeFileSync(this.fileName, JSON.stringify(items, null, 2));
   }
 
