@@ -1,25 +1,32 @@
-const express = require("express");
-const { connect } = require("mongoose");
-const routerProducts = require('./routes/routerProducts.js');
-const routerCarts = require('./routes/routerCarts.js');
+const express = require('express');
+const { Server: HttpServer } = require('http');
+const { Server: IOServer } = require('socket.io');
+const { engine } = require('express-handlebars');
+const randomData = require('./faker');
 
+const PORT = 8080;
 const app = express();
-const PORT = process.env.PORT || 8080;
+const httpserver = new HttpServer(app);
+const io = new IOServer(httpserver);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static('views'));
 
-app.use('/api/products', routerProducts);
-app.use('/api/cart', routerCarts);
-app.use('*', (req, res) => {
-	const path = req.params;
-	const method = req.method;
-	res.send({ error: -2, descripcion: `ruta '${path[0]}' método '${method}' no implementada` });
+app.engine('handlebars', engine());
+app.set('views', './views');
+app.set('view engine', 'handlebars');
+
+app.get('/api/products-test', (req, res) => {
+    res.render('table');
 });
 
-const server = app.listen(PORT, async () => {
-	// await connect('mongodb://localhost:27017/products');
-	console.log(`Server running on PORT ${PORT}`);
+io.on('connection', async socket => {
+    console.log('Conexión establecida');
+    const data = randomData();
+    io.sockets.emit('products', data);
+    socket.on('product', async data => {
+        io.sockets.emit('products', data);
+    })
 });
 
-server.on('error', err => console.log(err));
+const server = httpserver.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.on('error', () => console.log(`Error: ${err}`));
